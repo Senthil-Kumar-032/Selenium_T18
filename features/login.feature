@@ -4,17 +4,18 @@ Feature: Zen Portal Login
     Given User opens Zen portal
     When User enters valid credentials
     Then User should login successfully
-    And User logs out
 
-  Scenario: Unsuccessful Login
+  Scenario: Invalid Login
     Given User opens Zen portal
     When User enters invalid credentials
     Then Login should fail
 
-  Scenario: Validate Inputs
+  Scenario: UI Validation
     Given User opens Zen portal
     Then Input fields should be visible
+    And Login button should be enabled
 
-  Scenario: Validate Submit Button
+  Scenario: Logout
     Given User opens Zen portal
-    Then Login button should be enabled
+    When User enters valid credentials
+    Then User logs out

@@ -1,59 +1,59 @@
+# Behave step keywords
 from behave import given, when, then
-from selenium import webdriver
 from pages.login_page import LoginPage
-import time
+from utils.driver_setup import DriverSetup
+import json
 
-# valid test data
-VALID_USER = "Enter valid emailid"
-VALID_PASS = "Enter valid password"
+# Load test data from JSON file
+def load_data():
+    with open("test_data.json") as f:
+        return json.load(f)
 
+data = load_data()  # store data globally
+
+# Open browser and load website
 @given("User opens Zen portal")
 def step_open(context):
-    # setup chrome with notifications disabled
-    options = webdriver.ChromeOptions()
-    options.add_argument("--disable-notifications")
+    context.driver = DriverSetup().get_driver()   # start browser
+    context.page = LoginPage(context.driver)      # create page object
 
-    context.driver = webdriver.Chrome(options=options)
-    context.page = LoginPage(context.driver)
+    context.page.open_url()                       # open site
+    context.page.close_popup_if_present()         # close popup if any
 
-    # open site and handle popup
-    context.page.open_url()
-    context.page.close_popup_if_present()
-
+# Login with valid credentials
 @when("User enters valid credentials")
 def step_valid_login(context):
-    # login with correct credentials
-    context.page.login(VALID_USER, VALID_PASS)
-    context.page.close_popup_if_present()
+    user = data["valid_user"]                     # get valid user
+    context.page.login(user["username"], user["password"])
+    context.page.close_popup_if_present()         # close popup again if needed
 
+# Login with invalid credentials
 @when("User enters invalid credentials")
 def step_invalid_login(context):
-    # login with wrong credentials
-    context.page.login("senthil123@gmail.com", "Password.123")
+    user = data["invalid_user"]                   # get invalid user
+    context.page.login(user["username"], user["password"])
 
+# Check login success
 @then("User should login successfully")
 def step_success(context):
-    # check login success by URL change
     assert context.driver.current_url != "https://v2.zenclass.in/login"
 
+# Check login failure
 @then("Login should fail")
 def step_fail(context):
-    # check still on login page
     assert "login" in context.driver.current_url
 
+# Check input fields visible
 @then("Input fields should be visible")
 def step_validate_inputs(context):
-    # verify email field is visible
     assert context.page.validate_input_fields()
 
+# Check login button enabled
 @then("Login button should be enabled")
 def step_validate_button(context):
-    # verify login button is clickable
     assert context.page.validate_login_button()
 
+# Logout step
 @then("User logs out")
 def step_logout(context):
-    # perform logout and close browser
     context.page.logout()
-    time.sleep(3)
-    context.driver.quit()

@@ -3,10 +3,12 @@ from selenium.webdriver.chrome.options import Options
 
 class DriverSetup:
 
-    def get_driver(self):
+    @staticmethod
+    def get_driver():
         options = Options()
-        options.add_argument("--disable-notifications")  # disable popup
-        driver = webdriver.Chrome(options=options)
-        driver.maximize_window()
-        driver.implicitly_wait(10)
-        return driver
+        options.add_argument("--disable-notifications")  # disable browser notifications
+        options.add_argument("--start-maximized")        # open browser in full screen
+
+        driver = webdriver.Chrome(options=options)      # launch Chrome browser
+        driver.implicitly_wait(10)                       # apply implicit wait
+        return driver                                   # return driver instance
